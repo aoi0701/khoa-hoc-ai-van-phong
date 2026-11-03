@@ -1,125 +1,237 @@
 ---
 import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Socials from "@/components/Socials.astro";
 import Card from "@/components/Card.astro";
-import LinkButton from "@/components/LinkButton.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
-import { useTranslations } from "@/i18n";
 import config from "@/config";
 
-const { socials, posts: postsConfig } = config;
-
 const locale = Astro.currentLocale ?? config.site.lang;
-const t = useTranslations(locale);
-
-const posts = await getCollection("posts");
-const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+const posts = getSortedPosts(await getCollection("posts"));
 const homePath = getRelativeLocaleUrl(locale, "");
+const comparePath = getRelativeLocaleUrl(
+  locale,
+  "posts/so-sanh-khoa-hoc-ai-cho-dan-van-phong"
+);
+
+// Thông tin do đơn vị công bố, kiểm tra ngày 03/11/2026. Đồng bộ với bài so sánh.
+const checkedAt = "03/11/2026";
+const courses = [
+  {
+    unit: "Hướng Nghiệp Á Âu",
+    name: "Trọn Bộ Công Cụ AI Văn Phòng Chuyên Sâu",
+    price: "2.000.000 đ",
+    priceNote: "trực tuyến; trực tiếp 3.000.000 đ",
+    length: "8 buổi",
+    format: "Trực tiếp hoặc trực tuyến",
+    tools: ["ChatGPT", "Canva AI", "Excel AI", "AIPRM"],
+    fit: "Muốn học nhiều công cụ, nhiều thực hành",
+    url: "https://www.huongnghiepaau.com/khoa-hoc-tron-bo-cong-cu-ai-van-phong",
+  },
+  {
+    unit: "iRTC",
+    name: "Tối ưu hóa công việc với ChatGPT",
+    price: "2.800.000 đ",
+    priceNote: "có ưu đãi theo điều kiện",
+    length: "4 buổi",
+    format: "Trang không nêu rõ",
+    tools: ["ChatGPT"],
+    fit: "Chỉ muốn tập trung vào ChatGPT",
+    url: "https://irtc.edu.vn/1304-khoa-hoc-chat-gpt/khoa-hoc.htm",
+  },
+  {
+    unit: "RedPola",
+    name: "AI in Office",
+    price: "1.500.000 đ",
+    priceNote: "đang giảm từ 3.000.000 đ",
+    length: "3 buổi, mỗi buổi 2,5 giờ",
+    format: "Trang không nêu rõ; có ghi hình",
+    tools: ["ChatGPT", "Notion AI", "Gamma", "Canva AI"],
+    fit: "Muốn một khóa ngắn vào buổi tối",
+    url: "https://redpola.com/ai-in-office/",
+  },
+];
+
+const needs = [
+  {
+    title: "Mới bắt đầu với AI",
+    text: "Ưu tiên khóa nêu rõ nhận người chưa có kinh nghiệm và có nhiều giờ thực hành.",
+    pick: "Xem khóa của Hướng Nghiệp Á Âu",
+  },
+  {
+    title: "Chỉ cần dùng tốt ChatGPT",
+    text: "Chọn khóa tập trung vào một công cụ để áp dụng ngay vào việc hằng ngày.",
+    pick: "Xem khóa của iRTC",
+  },
+  {
+    title: "Ít thời gian, muốn học nhanh",
+    text: "Chọn khóa ngắn vào buổi tối, và hỏi rõ lịch khai giảng mới nhất trước khi đăng ký.",
+    pick: "Xem khóa của RedPola",
+  },
+];
+
+const steps = [
+  ["Lấy từ nguồn chính thức", "Thông tin được đọc từ trang khóa học của từng đơn vị đào tạo."],
+  ["Ghi rõ nguồn và ngày", "Mỗi khóa có link nguồn, kèm ngày kiểm tra để bạn tự đối chiếu."],
+  ["Nói rõ điều chưa biết", "Chỗ nào đơn vị không công bố, trang ghi là không nêu thay vì suy đoán."],
+];
+
+const faqs = [
+  ["Trang này có bán khóa học không?", "Không. Trang chỉ tổng hợp thông tin công khai và không nhận đăng ký học."],
+  ["Các trang có đánh giá chất lượng giảng dạy không?", "Không. Chúng tôi chưa học thử các khóa này nên chỉ so sánh thông tin do đơn vị công bố."],
+  ["Học phí trên trang đã là giá cuối chưa?", "Chưa chắc. Học phí và ưu đãi có thể thay đổi, nên hãy xác nhận với đơn vị trước khi thanh toán."],
+];
 ---
 
 <Layout>
   <Header />
-  <main
-    id="main-content"
-    data-layout="index"
-    data-home-path={homePath}
-    class="app-layout my-1"
-  >
-    <section id="hero" class="border-border border-b pt-8 pb-6">
-      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
-        So sánh khóa học AI cho dân văn phòng
-      </h1>{" "}
-      <a
-        target="_blank"
-        href={`${import.meta.env.BASE_URL.replace(/\/?$/, "/")}rss.xml`}
-        class="inline-block"
-        aria-label="RSS Feed"
-        title="RSS Feed"
-      >
-        <IconRss
-          width={20}
-          height={20}
-          class="stroke-accent scale-125 stroke-3 rtl:-rotate-90"
-        />
-        <span class="sr-only">RSS Feed</span>
-      </a>
+  <main id="main-content" data-layout="index" data-home-path={homePath}>
+    <section class="site-layout grid items-center gap-10 py-12 lg:grid-cols-[1.15fr_1fr] lg:py-20">
+      <div>
+        <p class="bg-accent-soft text-accent mb-5 inline-block rounded-full px-3 py-1 text-sm font-medium">
+          Thông tin kiểm tra ngày {checkedAt}
+        </p>
+        <h1 class="text-4xl leading-tight font-bold tracking-tight sm:text-5xl sm:leading-[1.1]">
+          Chọn khóa học AI phù hợp với công việc văn phòng
+        </h1>
+        <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-relaxed">
+          So sánh học phí, thời lượng, công cụ và chứng nhận của các khóa học có
+          thật, kèm link nguồn để bạn tự đối chiếu trước khi đăng ký.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={comparePath} class="bg-accent text-accent-foreground inline-flex items-center gap-2 rounded-lg px-5 py-3 font-semibold transition-opacity hover:opacity-90">
+            Xem bảng so sánh <IconArrowRight class="size-5" />
+          </a>
+          <a href="#nhu-cau" class="border-border bg-surface inline-flex items-center rounded-lg border px-5 py-3 font-semibold transition-colors hover:border-accent">
+            Chọn theo nhu cầu
+          </a>
+        </div>
+      </div>
 
-      <p>
-        Trang tổng hợp thông tin các khóa học AI dành cho người đi làm văn phòng
-        và không biết lập trình. Mỗi thông tin đều có nguồn và ngày kiểm tra để
-        bạn tự đối chiếu trước khi đăng ký.
-      </p>
-      <p class="mt-2">
-        Trang không bán khóa học. Đọc thêm tại trang{" "}
-        <LinkButton
-          class="hover:text-accent underline decoration-dashed underline-offset-4"
-          href={getRelativeLocaleUrl(locale, "about")}
-        >
-          Giới thiệu
-        </LinkButton>.
-      </p>
-      {
-        socials.length > 0 && (
-          <div class="mt-4 flex max-sm:flex-col sm:items-center">
-            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
-              {t.home.socialLinks}:
-            </div>
-            <Socials />
-          </div>
-        )
-      }
+      <div class="border-border bg-surface rounded-2xl border p-5 shadow-sm sm:p-6">
+        <div class="mb-4 flex items-baseline justify-between gap-3">
+          <h2 class="text-lg font-semibold">So sánh nhanh</h2>
+          <span class="text-muted-foreground text-sm">Học phí niêm yết</span>
+        </div>
+        <ul class="divide-border divide-y">
+          {courses.map(c => (
+            <li class="flex items-center justify-between gap-4 py-3">
+              <div>
+                <p class="font-semibold">{c.unit}</p>
+                <p class="text-muted-foreground text-sm">{c.length}</p>
+              </div>
+              <p class="text-accent text-right font-bold whitespace-nowrap">{c.price}</p>
+            </li>
+          ))}
+        </ul>
+        <p class="text-muted-foreground mt-3 text-xs">
+          Hướng Nghiệp Á Âu: giá học trực tuyến. RedPola: giá đang giảm.
+        </p>
+      </div>
     </section>
 
-    {
-      featuredPosts.length > 0 && (
-        <section
-          id="featured"
-          class:list={[
-            "pt-12 pb-6",
-            { "border-border border-b": recentPosts.length > 0 },
-          ]}
-        >
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.featured}
-          </h2>
-          <ul>
-            {featuredPosts.map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    <section class="border-border bg-surface border-y">
+      <dl class="site-layout grid gap-6 py-8 sm:grid-cols-3">
+        <div>
+          <dt class="text-muted-foreground text-sm">Đã đối chiếu</dt>
+          <dd class="mt-1 text-2xl font-bold">{courses.length} khóa học</dd>
+        </div>
+        <div>
+          <dt class="text-muted-foreground text-sm">Mọi khóa đều có</dt>
+          <dd class="mt-1 text-2xl font-bold">Link nguồn</dd>
+        </div>
+        <div>
+          <dt class="text-muted-foreground text-sm">Trang này</dt>
+          <dd class="mt-1 text-2xl font-bold">Không bán khóa học</dd>
+        </div>
+      </dl>
+    </section>
 
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.recentPosts}
-          </h2>
-          <ul>
-            {recentPosts.slice(0, postsConfig.perIndex).map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    <section id="khoa-hoc" class="site-layout py-14 lg:py-20">
+      <h2 class="text-3xl font-bold tracking-tight">Các khóa học đang so sánh</h2>
+      <p class="text-muted-foreground mt-3 max-w-2xl">
+        Thông tin do đơn vị công bố. Chúng tôi chưa học thử nên không chấm chất lượng giảng dạy.
+      </p>
+      <div class="mt-8 grid gap-5 md:grid-cols-3">
+        {courses.map(c => (
+          <article class="border-border bg-surface flex flex-col rounded-2xl border p-6">
+            <p class="text-accent text-sm font-semibold">{c.unit}</p>
+            <h3 class="mt-1 text-lg leading-snug font-bold">{c.name}</h3>
+            <p class="mt-4 text-2xl font-bold">{c.price}</p>
+            <p class="text-muted-foreground text-sm">{c.priceNote}</p>
+            <dl class="mt-5 space-y-3 text-sm">
+              <div><dt class="text-muted-foreground">Thời lượng</dt><dd class="font-medium">{c.length}</dd></div>
+              <div><dt class="text-muted-foreground">Hình thức</dt><dd class="font-medium">{c.format}</dd></div>
+              <div><dt class="text-muted-foreground">Phù hợp nếu</dt><dd class="font-medium">{c.fit}</dd></div>
+            </dl>
+            <ul class="mt-5 mb-6 flex flex-wrap gap-2">
+              {c.tools.map(tool => <li class="bg-accent-soft text-accent rounded-md px-2 py-1 text-xs font-medium">{tool}</li>)}
+            </ul>
+            <a href={c.url} target="_blank" rel="noopener" class="text-accent mt-auto inline-flex items-center gap-1 font-semibold underline underline-offset-4">
+              Xem nguồn của {c.unit}
+            </a>
+          </article>
+        ))}
+      </div>
+      <p class="mt-6">
+        <a href={comparePath} class="text-accent inline-flex items-center gap-2 font-semibold underline underline-offset-4">
+          Xem bảng so sánh đầy đủ <IconArrowRight class="size-5" />
+        </a>
+      </p>
+    </section>
 
-    <div class="my-8 text-center">
-      <LinkButton href={getRelativeLocaleUrl(locale, "posts")}>
-        {t.home.allPosts}
-        <IconArrowRight class="inline-block rtl:-rotate-180" />
-      </LinkButton>
-    </div>
+    <section id="nhu-cau" class="bg-accent-soft py-14 lg:py-20">
+      <div class="site-layout">
+        <h2 class="text-3xl font-bold tracking-tight">Bạn đang cần gì?</h2>
+        <div class="mt-8 grid gap-5 md:grid-cols-3">
+          {needs.map(n => (
+            <a href={comparePath} class="bg-surface border-border group rounded-2xl border p-6 transition-colors hover:border-accent">
+              <h3 class="text-lg font-bold">{n.title}</h3>
+              <p class="text-muted-foreground mt-2 text-sm leading-relaxed">{n.text}</p>
+              <p class="text-accent mt-4 text-sm font-semibold group-hover:underline">{n.pick}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="site-layout grid gap-12 py-14 lg:grid-cols-2 lg:py-20">
+      <div>
+        <h2 class="text-3xl font-bold tracking-tight">Cách chúng tôi kiểm tra</h2>
+        <ol class="mt-8 space-y-6">
+          {steps.map(([title, text], i) => (
+            <li class="flex gap-4">
+              <span class="bg-accent text-accent-foreground flex size-9 shrink-0 items-center justify-center rounded-full font-bold">{i + 1}</span>
+              <div>
+                <h3 class="font-bold">{title}</h3>
+                <p class="text-muted-foreground mt-1 text-sm leading-relaxed">{text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div>
+        <h2 class="text-3xl font-bold tracking-tight">Câu hỏi thường gặp</h2>
+        <div class="mt-6">
+          {faqs.map(([q, a]) => (
+            <details class="border-border group border-b py-4">
+              <summary class="cursor-pointer font-semibold">{q}</summary>
+              <p class="text-muted-foreground mt-2 text-sm leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="border-border site-layout border-t py-14">
+      <h2 class="text-3xl font-bold tracking-tight">Bài so sánh mới nhất</h2>
+      <ul class="mt-4">
+        {posts.slice(0, config.posts.perIndex).map(data => <Card variant="h3" {...data} />)}
+      </ul>
+    </section>
   </main>
   <Footer />
 </Layout>
